@@ -1,18 +1,18 @@
 <script>
-  // Data for the conceptual map with unique colors
+  // Data for the conceptual map with "Concept" as the central node
   const data = {
     nodes: [
-      { id: "Concept A", color: "#ff5733" },
-      { id: "Concept B", color: "#33ff57" },
-      { id: "Concept C", color: "#3357ff" },
-      { id: "Concept D", color: "#f1c40f" },
-      { id: "Concept E", color: "#9b59b6" },
+      { id: "Concept", color: "#ff5733" }, // Central node in red-orange
+      { id: "Concept A", color: "#33ff57" }, // Green
+      { id: "Concept B", color: "#3357ff" }, // Blue
+      { id: "Concept C", color: "#f1c40f" }, // Yellow
+      { id: "Concept D", color: "#9b59b6" }, // Purple
     ],
     links: [
-      { source: "Concept A", target: "Concept B" },
-      { source: "Concept A", target: "Concept C" },
-      { source: "Concept B", target: "Concept D" },
-      { source: "Concept C", target: "Concept E" },
+      { source: "Concept", target: "Concept A" },
+      { source: "Concept", target: "Concept B" },
+      { source: "Concept", target: "Concept C" },
+      { source: "Concept", target: "Concept D" },
     ],
   };
 
@@ -45,7 +45,7 @@
     .data(data.nodes)
     .enter()
     .append("circle")
-    .attr("r", 10)
+    .attr("r", d => (d.id === "Concept" ? 15 : 10)) // Central node is larger
     .attr("fill", d => d.color)
     .call(d3.drag()
       .on("start", dragStarted)
@@ -60,7 +60,7 @@
     .append("text")
     .text(d => d.id)
     .attr("text-anchor", "middle")
-    .attr("dy", -15);
+    .attr("dy", -20);
 
   // Simulation update
   simulation.on("tick", () => {
@@ -81,20 +81,23 @@
 
   // Handle click events
   function onClick(event, d) {
-    // Add sub-nodes dynamically for the clicked node
-    const subNodes = [
-      { id: `${d.id} 1`, color: "#f08080" }, // Light Red
-      { id: `${d.id} 2`, color: "#87cefa" }, // Light Blue
-    ];
+    if (d.id === "Concept") {
+      // Add sub-nodes dynamically for the central node
+      const subNodes = [
+        { id: `Sub 1`, color: "#f08080" }, // Light red
+        { id: `Sub 2`, color: "#87cefa" }, // Light blue
+        { id: `Sub 3`, color: "#90ee90" }, // Light green
+      ];
 
-    const subLinks = subNodes.map(sub => ({ source: d.id, target: sub.id }));
+      const subLinks = subNodes.map(sub => ({ source: "Concept", target: sub.id }));
 
-    // Add sub-nodes and sub-links to the data
-    data.nodes.push(...subNodes);
-    data.links.push(...subLinks);
+      // Add sub-nodes and sub-links to the data
+      data.nodes.push(...subNodes);
+      data.links.push(...subLinks);
 
-    // Update the graph with new nodes and links
-    updateGraph();
+      // Update the graph with new nodes and links
+      updateGraph();
+    }
   }
 
   // Function to update the graph with new data
@@ -115,7 +118,7 @@
 
     updatedNodes.enter()
       .append("circle")
-      .attr("r", 10)
+      .attr("r", d => (d.id === "Concept" ? 15 : 10))
       .attr("fill", d => d.color)
       .call(d3.drag()
         .on("start", dragStarted)
@@ -132,7 +135,7 @@
       .append("text")
       .text(d => d.id)
       .attr("text-anchor", "middle")
-      .attr("dy", -15)
+      .attr("dy", -20)
       .merge(updatedLabels);
 
     // Restart the simulation with the new data
